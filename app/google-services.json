@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "206786613957",
+    "firebase_url": "https://qr-reader-compose-demo.firebaseio.com",
+    "project_id": "qr-reader-compose-demo",
+    "storage_bucket": "qr-reader-compose-demo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:206786613957:android:6991d012bdba74a16196ac",
+        "android_client_info": {
+          "package_name": "com.example.qrcodereadercomposedemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "206786613957-6lpeg7rpemch02kvtst2teblg7q7k7vo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6454B-Toj2K4qw7Z3PzebezuTj3L4SwE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "206786613957-6lpeg7rpemch02kvtst2teblg7q7k7vo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
