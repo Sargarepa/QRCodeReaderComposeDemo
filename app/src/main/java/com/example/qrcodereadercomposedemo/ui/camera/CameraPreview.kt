@@ -1,45 +1,64 @@
 package com.example.qrcodereadercomposedemo.ui.camera
 
+import android.content.Context
+import android.util.Log
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.Stack
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.LifecycleOwnerAmbient
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 
+private const val TAG = "CameraPreview"
+
 @Composable
-fun CameraPreview() {
+fun CameraPreview(onClick: (ImageCapture, Context) -> Unit) {
     val lifecycleOwner = LifecycleOwnerAmbient.current
     val context = ContextAmbient.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
-    AndroidView(viewBlock = ::PreviewView) { previewView ->
-        cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            bindPreview(
-                lifecycleOwner,
-                previewView,
-                cameraProvider)
-        }, ContextCompat.getMainExecutor(context))
-    }
-}
-
-fun bindPreview(
-    lifecycleOwner: LifecycleOwner,
-    previewView: PreviewView,
-    cameraProvider: ProcessCameraProvider
-) {
-    val preview: Preview = Preview.Builder().build()
-
-    val cameraSelector: CameraSelector = CameraSelector.Builder()
-        .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+    val imageCapture = ImageCapture.Builder()
         .build()
+    Stack {
+        AndroidView(viewBlock = ::PreviewView, modifier = Modifier.fillMaxWidth().fillMaxHeight()) { previewView ->
+            cameraProviderFuture.addListener({
+                val cameraProvider = cameraProviderFuture.get()
+                val preview = Preview.Builder()
+                    .build()
+                    .also {
+                        it.setSurfaceProvider(previewView.surfaceProvider)
+                    }
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                try {
+                    // Unbind use cases before rebinding
+                    cameraProvider.unbindAll()
 
-    preview.setSurfaceProvider(previewView.surfaceProvider)
+                    // Bind use cases to camera
+                    cameraProvider.bindToLifecycle(
+                        lifecycleOwner, cameraSelector, preview, imageCapture
+                    )
 
-    cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview)
+                } catch (exc: Exception) {
+                    Log.e(TAG, "Use case binding failed", exc)
+                }
+            }, ContextCompat.getMainExecutor(context))
+        }
+        Button(onClick = { onClick(imageCapture, context) }, Modifier.align(Alignment.BottomCenter)) {
+            Text("Scan code")
+        }
+    }
+
 }
+
