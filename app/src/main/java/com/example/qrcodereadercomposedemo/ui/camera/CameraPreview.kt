@@ -25,7 +25,7 @@ import androidx.lifecycle.LifecycleOwner
 private const val TAG = "CameraPreview"
 
 @Composable
-fun CameraPreview(onClick: (ImageCapture, Context) -> Unit) {
+fun CameraPreview(barcodeViewmodel: BarcodeViewmodel) {
     val lifecycleOwner = LifecycleOwnerAmbient.current
     val context = ContextAmbient.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
@@ -55,7 +55,7 @@ fun CameraPreview(onClick: (ImageCapture, Context) -> Unit) {
                 }
             }, ContextCompat.getMainExecutor(context))
         }
-        Button(onClick = { onClick(imageCapture, context) }, Modifier.align(Alignment.BottomCenter)) {
+        Button(onClick = { barcodeViewmodel.takePictureAndRunBarcodeScanner(imageCapture, context) }, Modifier.align(Alignment.BottomCenter)) {
             Text("Scan code")
         }
     }
