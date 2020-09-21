@@ -82,7 +82,7 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-ml-vision:24.1.0'
     implementation 'com.google.mlkit:barcode-scanning:16.0.3'
-    implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
+    implementation 'com.firebaseui:firebase-ui-auth:6.3.0'
 
     //CameraX
     implementation "androidx.camera:camera-core:$camerax_version"
