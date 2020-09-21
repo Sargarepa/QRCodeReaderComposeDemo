@@ -77,15 +77,21 @@ dependencies {
     implementation "org.koin:koin-android:$koin_version"
     implementation "org.koin:koin-androidx-viewmodel:$koin_version"
 
-    implementation 'com.google.firebase:firebase-ml-vision:17.0.0'
-    implementation 'com.google.firebase:firebase-core:16.0.3'
+    //Firebase
+    implementation 'com.google.android.gms:play-services-vision:20.1.2'
 
+    implementation 'com.google.firebase:firebase-ml-vision:24.1.0'
+    implementation 'com.google.mlkit:barcode-scanning:16.0.3'
+    implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
+
+    //CameraX
     implementation "androidx.camera:camera-core:$camerax_version"
     implementation "androidx.camera:camera-camera2:$camerax_version"
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
     implementation "androidx.camera:camera-view:1.0.0-alpha16"
     implementation "androidx.camera:camera-extensions:1.0.0-alpha16"
 
+    //Test
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'

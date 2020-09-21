@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -20,11 +19,11 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.qrcodereadercomposedemo.ui.QRCodeReaderComposeDemoTheme
 import com.example.qrcodereadercomposedemo.ui.camera.CameraPreview
-import com.google.firebase.ml.vision.FirebaseVision
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions
-import com.google.firebase.ml.vision.common.FirebaseVisionImage
-import java.nio.Buffer
+import com.google.android.gms.vision.barcode.Barcode
+import com.google.mlkit.vision.barcode.Barcode.*
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.common.InputImage
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,9 +84,10 @@ class MainActivity : AppCompatActivity() {
     fun takePictureAndRunBarcodeScanner(imageCapture: ImageCapture, context: Context) {
         imageCapture.takePicture(
             ContextCompat.getMainExecutor(context),
-            object: ImageCapture.OnImageCapturedCallback() {
+            object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
                     runBarcodeScanner(image.toBitmap(), context)
+                    image.close()
                 }
 
                 override fun onError(exception: ImageCaptureException) {
@@ -98,51 +98,87 @@ class MainActivity : AppCompatActivity() {
 
     private fun runBarcodeScanner(bitmap: Bitmap, context: Context) {
         //Create a FirebaseVisionImage
-        val image = FirebaseVisionImage.fromBitmap(bitmap)
+        val image = InputImage.fromBitmap(bitmap, 0)
 
         //Optional : Define what kind of barcodes you want to scan
-        val options = FirebaseVisionBarcodeDetectorOptions.Builder()
+        val options = BarcodeScannerOptions.Builder()
             .setBarcodeFormats(
-                //Detect all kind of barcodes
-                FirebaseVisionBarcode.FORMAT_ALL_FORMATS
-                //Or specify which kind of barcode you want to detect
-                /*
-                    FirebaseVisionBarcode.FORMAT_QR_CODE,
-                FirebaseVisionBarcode.FORMAT_AZTEC
-                 */
+                Barcode.ALL_FORMATS
             )
             .build()
 
         //Get access to an instance of FirebaseBarcodeDetector
-        val detector = FirebaseVision.getInstance().getVisionBarcodeDetector(options)
+        val scanner = BarcodeScanning.getClient(options)
 
         //Use the detector to detect the labels inside the image
-        detector.detectInImage(image)
-            .addOnSuccessListener {
-                // Task completed successfully
-                for (firebaseBarcode in it) {
-                    when (firebaseBarcode.valueType) {
-                        //Handle the URL here
-                        FirebaseVisionBarcode.TYPE_URL ->
-                            Toast.makeText(context, "URL: ${firebaseBarcode.displayValue}", Toast.LENGTH_SHORT)
+        scanner.process(image)
+            .addOnSuccessListener { barcodes ->
+                for (barcode in barcodes) {
+                    // See API reference for complete list of supported types
+                    when (barcode.valueType) {
+                        TYPE_WIFI -> {
+                            val ssid = barcode.wifi?.ssid
+                            val password = barcode.wifi?.password
+                            val type = barcode.wifi?.encryptionType
+                            Toast.makeText(
+                                context,
+                                "WIFI: ssid = $ssid, " +
+                                        "password = $password, " +
+                                        "type = $type",
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
-                        // Handle the contact info here, i.e. address, name, phone, etc.
-                        FirebaseVisionBarcode.TYPE_CONTACT_INFO ->
-                            Toast.makeText(context, "CONTACT_INFO: ${firebaseBarcode.contactInfo?.title}", Toast.LENGTH_SHORT)
+                        }
+                        TYPE_URL -> {
+                            val title = barcode.url?.title
+                            val url = barcode.url?.url
+                            Toast.makeText(
+                                context,
+                                "URL: title = $title, " +
+                                        "url = $url",
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
-                        // Handle the wifi here, i.e. firebaseBarcode.wifi.ssid, etc.
-                        FirebaseVisionBarcode.TYPE_WIFI ->
-                            Toast.makeText(context, "WIFI: ${firebaseBarcode.wifi?.ssid}", Toast.LENGTH_SHORT)
+                        }
+                        TYPE_CONTACT_INFO -> {
+                            val addresses = barcode.contactInfo?.addresses
+                            val emails = barcode.contactInfo?.emails
+                            val phones = barcode.contactInfo?.phones
+                            val names = barcode.contactInfo?.name
+                            val organization = barcode.contactInfo?.organization
+                            val title = barcode.contactInfo?.title
+                            val urls = barcode.contactInfo?.urls
+                            Toast.makeText(
+                                context,
+                                "CONTACT INFO: names = $names, " +
+                                        "organization = $organization, " +
+                                        "addresses = $addresses, " +
+                                        "emails = $emails, " +
+                                        "phones = $phones, " +
+                                        "title = $title, " +
+                                        "urls = $urls",
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
-                        // Handle the driver license barcode here, i.e. City, Name, Expiry, etc.
-                        FirebaseVisionBarcode.TYPE_DRIVER_LICENSE ->
-                            Toast.makeText(context, "DRIVER_LICENCE: ${firebaseBarcode.driverLicense?.licenseNumber}", Toast.LENGTH_SHORT)
+                        }
+                        TYPE_DRIVER_LICENSE -> {
+                            val licenseNumber = barcode.driverLicense?.licenseNumber
+                            Toast.makeText(
+                                context,
+                                "DRIVER_LICENCE: $licenseNumber",
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
-                        //Handle more types
-                        else ->
-                            Toast.makeText(context, "GENERIC: ${firebaseBarcode.displayValue}", Toast.LENGTH_SHORT)
+                        }
+                        else -> {
+                            val displayValue = barcode.displayValue
+                            Toast.makeText(
+                                context,
+                                "GENERIC: $displayValue",
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
-                        //None of the above type was detected, so extract the value from the barcode
+                        }
                     }
                 }
             }
