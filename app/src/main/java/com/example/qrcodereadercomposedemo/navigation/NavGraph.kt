@@ -18,7 +18,14 @@ sealed class Destination : Parcelable {
  * Models the navigation actions in the app.
  */
 class Actions(navigator: Navigator<Destination>) {
-    val login: () -> Unit = {
+    val popBackToDestination: (destination: Destination) -> Unit = { destination ->
+        navigator.popBackStack(destination)
+    }
+
+    val navigateToLogin: () -> Unit = {
+        navigator.navigate(Destination.Login)
+    }
+    val navigateToBarcodeScanner: () -> Unit = {
         navigator.navigate(Destination.BarcodeScanner)
     }
     val upPress: () -> Unit = {

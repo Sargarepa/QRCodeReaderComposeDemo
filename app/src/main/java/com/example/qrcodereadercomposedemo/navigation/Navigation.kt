@@ -42,6 +42,21 @@ class Navigator<T : Parcelable> private constructor(
         backCallback.isEnabled = canGoBack()
     }
 
+    fun popBackStack(destination: T) {
+        if (backStack.isEmpty()) {
+            return
+        }
+        if (destination !in backStack) return
+        for (i in backStack.size - 1 downTo 0) {
+            if (backStack[i] != destination) {
+                back()
+            } else {
+                backCallback.isEnabled = canGoBack()
+                return
+            }
+        }
+    }
+
     private fun canGoBack(): Boolean = backStack.size > 1
 
     companion object {
