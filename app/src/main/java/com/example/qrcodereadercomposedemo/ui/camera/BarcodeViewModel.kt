@@ -17,7 +17,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import org.koin.core.KoinComponent
 
-class BarcodeViewmodel : ViewModel(), KoinComponent {
+class BarcodeViewModel : ViewModel(), KoinComponent {
 
     @SuppressLint("UnsafeExperimentalUsageError")
     fun takePictureAndRunBarcodeScanner(imageCapture: ImageCapture, context: Context) {
@@ -30,7 +30,7 @@ class BarcodeViewmodel : ViewModel(), KoinComponent {
                 }
 
                 override fun onError(exception: ImageCaptureException) {
-                    Log.e(BarcodeViewmodel::class.java.simpleName, "Photo capture failed: ${exception.message}", exception)
+                    Log.e(BarcodeViewModel::class.java.simpleName, "Photo capture failed: ${exception.message}", exception)
                 }
             })
     }

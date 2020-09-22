@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Button
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,8 +21,22 @@ import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.LifecycleOwnerAmbient
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.example.qrcodereadercomposedemo.ui.LoginViewModel
+import com.example.qrcodereadercomposedemo.ui.LoginViewModel.AuthenticationState.AUTHENTICATED
+import com.example.qrcodereadercomposedemo.ui.LoginViewModel.AuthenticationState.UNAUTHENTICATED
 
-private const val TAG = "CameraPreview"
+
+
+@Composable
+fun BarcodeScannerScreen(barcodeViewModel: BarcodeViewModel, loginViewModel: LoginViewModel, navigateToLogin: () -> Unit) {
+    val authenticationState by loginViewModel.authenticationState.observeAsState()
+    when (authenticationState) {
+        UNAUTHENTICATED -> navigateToLogin()
+        AUTHENTICATED -> CameraPreview(barcodeViewModel = barcodeViewModel)
+        else -> Log.d("BarcodeScreen: ", "Something went wrong")
+    }
+}
+
 
 @Composable
 fun CameraPreview(barcodeViewModel: BarcodeViewModel) {
@@ -49,7 +65,7 @@ fun CameraPreview(barcodeViewModel: BarcodeViewModel) {
                     )
 
                 } catch (exc: Exception) {
-                    Log.e(TAG, "Use case binding failed", exc)
+                    Log.e("CameraPreview", "Use case binding failed", exc)
                 }
             }, ContextCompat.getMainExecutor(context))
         }
