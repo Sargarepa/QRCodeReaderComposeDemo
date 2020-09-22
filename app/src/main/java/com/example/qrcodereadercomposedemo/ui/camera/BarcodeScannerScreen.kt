@@ -1,6 +1,5 @@
 package com.example.qrcodereadercomposedemo.ui.camera
 
-import android.content.Context
 import android.util.Log
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -20,12 +19,11 @@ import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.platform.LifecycleOwnerAmbient
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
 
 private const val TAG = "CameraPreview"
 
 @Composable
-fun CameraPreview(barcodeViewmodel: BarcodeViewmodel) {
+fun CameraPreview(barcodeViewModel: BarcodeViewModel) {
     val lifecycleOwner = LifecycleOwnerAmbient.current
     val context = ContextAmbient.current
     val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
@@ -55,7 +53,7 @@ fun CameraPreview(barcodeViewmodel: BarcodeViewmodel) {
                 }
             }, ContextCompat.getMainExecutor(context))
         }
-        Button(onClick = { barcodeViewmodel.takePictureAndRunBarcodeScanner(imageCapture, context) }, Modifier.align(Alignment.BottomCenter)) {
+        Button(onClick = { barcodeViewModel.takePictureAndRunBarcodeScanner(imageCapture, context) }, Modifier.align(Alignment.BottomCenter)) {
             Text("Scan code")
         }
     }
