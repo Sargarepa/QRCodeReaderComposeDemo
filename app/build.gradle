@@ -85,6 +85,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-vision:24.1.0'
     implementation 'com.google.mlkit:barcode-scanning:16.0.3'
     implementation 'com.firebaseui:firebase-ui-auth:6.3.0'
+    implementation 'com.google.firebase:firebase-core:17.5.0'
+    implementation 'com.google.firebase:firebase-iid:20.2.4'
+    implementation 'com.google.firebase:firebase-messaging:20.2.4'
+
+    //Work
+    implementation 'android.arch.work:work-runtime:1.0.1'
 
     //CameraX
     implementation "androidx.camera:camera-core:$camerax_version"

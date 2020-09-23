@@ -3,34 +3,25 @@ package com.example.qrcodereadercomposedemo
 
 import android.Manifest
 import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.Crossfade
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Providers
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.savedinstancestate.rememberSavedInstanceState
 import androidx.compose.ui.platform.setContent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.qrcodereadercomposedemo.navigation.Actions
-import com.example.qrcodereadercomposedemo.navigation.BackDispatcherAmbient
-import com.example.qrcodereadercomposedemo.navigation.Destination
-import com.example.qrcodereadercomposedemo.navigation.Navigator
-import com.example.qrcodereadercomposedemo.ui.LoginScreen
-import com.example.qrcodereadercomposedemo.ui.LoginViewModel
-import com.example.qrcodereadercomposedemo.ui.QRCodeReaderComposeDemoTheme
-import com.example.qrcodereadercomposedemo.ui.WelcomeScreen
-import com.example.qrcodereadercomposedemo.ui.camera.BarcodeScannerScreen
+import com.example.qrcodereadercomposedemo.ui.*
 import com.example.qrcodereadercomposedemo.ui.camera.BarcodeViewModel
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.android.ext.android.inject
 
@@ -71,6 +62,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        createChannel(
+            getString(R.string.test_notification_channel_id),
+            getString(R.string.test_notification_channel_name)
+        )
+
+        subscribeTopic()
     }
 
     private fun allPermissionsGranted(): Boolean {
@@ -128,48 +125,46 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private fun createChannel(channelId: String, channelName: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create channel to show notifications.
+            val notificationChannel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            )
+                .apply {
+                    setShowBadge(false)
+                }
+
+            notificationChannel.enableLights(true)
+            notificationChannel.lightColor = Color.RED
+            notificationChannel.enableVibration(true)
+            notificationChannel.description = getString(R.string.test_notification_channel_description)
+
+            val notificationManager = getSystemService(
+                NotificationManager::class.java
+            )
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+    }
+
+    private fun subscribeTopic() {
+        FirebaseMessaging.getInstance().subscribeToTopic(TOPIC)
+            .addOnCompleteListener { task ->
+                var msg = getString(R.string.message_subscribed)
+                if (!task.isSuccessful) {
+                    msg = getString(R.string.message_subscribe_failed)
+                }
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            }
+    }
+
     companion object {
+        private const val TOPIC = "test"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
         private const val TAG = "MainActivity"
-    }
-}
-
-@ExperimentalCoroutinesApi
-@Composable
-fun QRApp(
-    backDispatcher: OnBackPressedDispatcher,
-    barcodeViewModel: BarcodeViewModel,
-    loginViewModel: LoginViewModel,
-    launchSignInFlow: () -> Unit
-) {
-    val navigator: Navigator<Destination> = rememberSavedInstanceState(
-        saver = Navigator.saver(backDispatcher)
-    ) {
-        Navigator(Destination.Welcome, backDispatcher)
-    }
-    val actions = remember(navigator) { Actions(navigator) }
-
-    Providers(BackDispatcherAmbient provides backDispatcher) {
-        Crossfade(navigator.current) { destination ->
-            when (destination) {
-                Destination.Welcome -> WelcomeScreen(
-                    loginViewModel,
-                    launchSignInFlow,
-                    actions.navigateToBarcodeScanner
-                )
-                Destination.Login -> LoginScreen(
-                    loginViewModel,
-                    launchSignInFlow,
-                    { actions.popBackToDestination(Destination.Welcome) },
-                    { actions.popBackToDestination(Destination.BarcodeScanner)})
-                Destination.BarcodeScanner -> BarcodeScannerScreen(
-                    barcodeViewModel,
-                    loginViewModel,
-                    actions.navigateToLogin
-                )
-            }
-        }
     }
 }
 

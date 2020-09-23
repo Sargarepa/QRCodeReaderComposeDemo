@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">QRCodeReaderComposeDemo</string>
+    <string name="message_subscribe_failed">Failed to subscribe to topic</string>
+    <string name="message_subscribed">Subscribed to topic</string>
+    <string name="test_notification_channel_description">Test reminder</string>
+    <string name="test_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="test_notification_channel_name" translatable="true">Test</string>
+    <string name="notification_title">Test title</string>
 </resources>
